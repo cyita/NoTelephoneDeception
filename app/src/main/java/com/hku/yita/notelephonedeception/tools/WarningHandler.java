@@ -2,6 +2,7 @@ package com.hku.yita.notelephonedeception.tools;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
@@ -23,8 +24,15 @@ import com.hku.yita.notelephonedeception.MainActivity;
 import com.hku.yita.notelephonedeception.MyPopupWindow;
 import com.hku.yita.notelephonedeception.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,11 +63,34 @@ public class WarningHandler {
         this.context = context;
     }
 
-    public void checkDeceptionCall(String incomingCall){
+    public void checkDeceptionCall(final String incomingCall){
         HashSet<String> contacts = readContacts();
         if(contacts.contains(incomingCall)){
         } else{
-            warningMessage = "The incoming call " + incomingCall + " is not included in your phone books!";
+            warningMessage = "The incoming call " + incomingCall;
+
+            AsyncTask<String, Void, String> task = new AsyncTask<String, Void, String>() {
+                boolean success = true;
+                String jsonString;
+
+                @Override
+                protected String doInBackground(String... strings) {
+                    final String url = "http://i.cs.hku.hk/~ynchen/blacklist.php?" + "action=check&num=" + incomingCall;
+                    jsonString = getJsonPage(url);
+                    if (jsonString.equals("Fail to connect"))
+                        success = false;
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(String result) {
+                    if (success) {
+                        parse_JSON_String_and_Switch_Activity(jsonString);
+                    } else {
+                    }
+                }
+            }.execute("");
+
             getWarningPicture();
         }
     }
@@ -144,6 +175,73 @@ public class WarningHandler {
                 popupWindow.showAtLocation(rootView, Gravity.CENTER,0,10);
             }
         }.execute("");
+    }
+
+    public String getJsonPage(String url) {
+        HttpURLConnection conn_object = null;
+        final int HTML_BUFFER_SIZE = 2*1024*1024;
+        char htmlBuffer[] = new char[HTML_BUFFER_SIZE];
+
+        try {
+            URL url_object = new URL(url);
+            conn_object = (HttpURLConnection) url_object.openConnection();
+            conn_object.setInstanceFollowRedirects(true);
+
+            BufferedReader reader_list = new BufferedReader(new InputStreamReader(conn_object.getInputStream()));
+            String HTMLSource = ReadBufferedHTML(reader_list, htmlBuffer, HTML_BUFFER_SIZE);
+            reader_list.close();
+            return HTMLSource;
+        } catch (Exception e) {
+            return "Fail to connect";
+        } finally {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            if (conn_object != null) {
+                conn_object.disconnect();
+            }
+        }
+    }
+
+    public String ReadBufferedHTML(BufferedReader reader, char [] htmlBuffer, int bufSz) throws java.io.IOException
+    {
+        htmlBuffer[0] = '\0';
+        int offset = 0;
+        do {
+            int cnt = reader.read(htmlBuffer, offset, bufSz - offset);
+            if (cnt > 0) {
+                offset += cnt;
+            } else {
+                break;
+            }
+        } while (true);
+        return new String(htmlBuffer);
+    }
+
+    public void parse_JSON_String_and_Switch_Activity(String JSONString) {
+        String deception = "";
+        String type = "";
+        try {
+            JSONObject rootJSONObj = new JSONObject(JSONString);
+            deception = rootJSONObj.getString("deception");
+            int deception_int = Integer.valueOf(deception);
+            type = rootJSONObj.getString("type");
+            int type_int = Integer.valueOf(type);
+            if(deception_int != 0 && deception_int != 2){
+                if(type_int == 1){
+                    warningMessage += " is marked as advertisement call !";
+                } else if(type_int == 2){
+                    warningMessage += " is marked as crime call !";
+                } else{
+                    warningMessage += " is marked as deception call !";
+                }
+            } else{
+                warningMessage += " is not included in your phone books !";
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
 
