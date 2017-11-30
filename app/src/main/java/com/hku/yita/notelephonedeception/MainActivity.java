@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.hku.yita.notelephonedeception.tools.WarningHandler;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     public final static int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 11;
+    private WarningHandler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Button btnIncomingCall = (Button) findViewById(R.id.button);
         ShowContacts();
+        handler = WarningHandler.getInstance();
+        handler.setContext(this);
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
@@ -82,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 
 
-            Cursor phoneCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
+            Cursor phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
 
             while(phoneCursor.moveToNext()){
 

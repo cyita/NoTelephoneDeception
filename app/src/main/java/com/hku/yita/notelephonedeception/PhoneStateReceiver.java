@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
+import com.hku.yita.notelephonedeception.tools.WarningHandler;
+
 import java.util.Date;
 
 /**
@@ -17,14 +19,13 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     private static Date callStartTime;
     private static boolean isIncoming;
     private static String savedNumber;
-
+    private static WarningHandler handler = WarningHandler.getInstance();
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
         if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {
             savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
-
         }
         else{
             String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
@@ -55,7 +56,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                 isIncoming = true;
                 callStartTime = new Date();
                 savedNumber = number;
-
+                handler.checkDeceptionCall(savedNumber);
                 Toast.makeText(context, "Incoming Call Ringing" , Toast.LENGTH_SHORT).show();
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
