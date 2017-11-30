@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 /**
@@ -26,9 +28,20 @@ public class MyPopupWindow extends PopupWindow {
     private Context mContext;
     private float mShowAlpha = 0.88f;
     private Drawable mBackgroundDrawable;
+    private TextView ok_btn;
 
     public MyPopupWindow(Context context) {
         this.mContext = context;
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        View popupView = inflater.inflate(R.layout.layout_popupwindow, null);
+//        ok_btn = (TextView) popupView.findViewById(R.id.okbtn);
+//        ok_btn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                ok_btn.setText("lala");
+//                MyPopupWindow.this.dismiss();
+//            }
+//        });
         initMyPopupWindow();
     }
 
