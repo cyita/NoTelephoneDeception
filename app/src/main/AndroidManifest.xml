@@ -17,9 +17,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
-
-    <receiver android:name=".PhoneStateReceiver">
+        <receiver android:name=".PhoneStateReceiver">
         <intent-filter>
             <action android:name="android.intent.action.PHONE_STATE" />
         </intent-filter>
@@ -27,5 +25,9 @@
             <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
         </intent-filter>
     </receiver>
+        <service android:name=".PhoneService"></service>
+    </application>
+
+
 
 </manifest>
