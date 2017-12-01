@@ -12,25 +12,34 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import SlideView.SlideSwitchView;
+import SlideView.SlideSwitchView.SlideListener;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements SlideListener{
 
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     public final static int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 11;
+    private TextView txt;
+    SlideSwitchView slide;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        txt = (TextView) findViewById(R.id.txt);
+        slide = (SlideSwitchView) findViewById(R.id.swit);
+        slide.setState(false);
+        slide.setSlideListener(this);
         Intent intent=new Intent(this,PhoneService.class);
         startService(intent);
-        Button btnIncomingCall = (Button) findViewById(R.id.button);
         ShowContacts();
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
@@ -39,9 +48,27 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
             }
         }
+    }
+
+    @Override
+    public void open() {
+        txt.setText("open");
+
+
+
 
 
     }
+
+    @Override
+    public void close() {
+        txt.setText("close");
+
+
+
+
+    }
+
 
     private void ShowContacts() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
@@ -49,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             readContacts();
         }
-
     }
 
     @Override
@@ -70,13 +96,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-
     }
 
     private void readContacts() {
         List<String> contractname = new ArrayList<String>();
         List<String> contractnumber = new ArrayList<String>();
-        Button btn = (Button) findViewById(R.id.button);
+        //Button btn = (Button) findViewById(R.id.button);
         ContentResolver resolver = getContentResolver();
         Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
         Cursor cursor = resolver.query(uri, null, null, null, null);
@@ -96,7 +121,5 @@ public class MainActivity extends AppCompatActivity {
             phoneCursor.close();
         }
         cursor.close();
-        btn.setText(contractname.toString()+contractnumber.toString());
-
     }
 }
