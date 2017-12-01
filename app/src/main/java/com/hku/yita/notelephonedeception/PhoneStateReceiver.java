@@ -57,7 +57,6 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                 callStartTime = new Date();
                 savedNumber = number;
                 handler.checkDeceptionCall(savedNumber);
-                Toast.makeText(context, "Incoming Call Ringing" , Toast.LENGTH_SHORT).show();
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
                 if(lastState != TelephonyManager.CALL_STATE_RINGING){
@@ -72,8 +71,8 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                     Toast.makeText(context, "Ringing but no pickup" + savedNumber + " Call time " + callStartTime +" Date " + new Date() , Toast.LENGTH_SHORT).show();
                 }
                 else if(isIncoming){
-
                     Toast.makeText(context, "Incoming " + savedNumber + " Call time " + callStartTime  , Toast.LENGTH_SHORT).show();
+                    handler.markDeceptionCall(savedNumber);
                 }
                 else{
                     Toast.makeText(context, "outgoing " + savedNumber + " Call time " + callStartTime +" Date " + new Date() , Toast.LENGTH_SHORT).show();

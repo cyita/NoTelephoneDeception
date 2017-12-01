@@ -2,6 +2,7 @@ package com.hku.yita.notelephonedeception.tools;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -10,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hku.yita.notelephonedeception.MainActivity;
 import com.hku.yita.notelephonedeception.MyPopupWindow;
@@ -48,6 +51,7 @@ public class WarningHandler {
     private static WarningHandler handler;
     private static Context context;
     private static String warningMessage;
+    private static HashSet<String> contacts;
 
     private WarningHandler(){}
 
@@ -55,6 +59,7 @@ public class WarningHandler {
         if(handler == null){
             handler = new WarningHandler();
             warningMessage = "";
+            contacts = new HashSet<>();
         }
         return handler;
     }
@@ -64,7 +69,7 @@ public class WarningHandler {
     }
 
     public void checkDeceptionCall(final String incomingCall){
-        HashSet<String> contacts = readContacts();
+        readContacts();
         if(contacts.contains(incomingCall)){
         } else{
             warningMessage = "The incoming call " + incomingCall;
@@ -92,14 +97,88 @@ public class WarningHandler {
             }.execute("");
 
             getWarningPicture();
+
         }
     }
 
-    private HashSet<String> readContacts() {
-        HashSet<String> contractNumSet = new HashSet<>();
+    public void markDeceptionCall(final String phoneNumber){
+        if(contacts.contains(phoneNumber)){
+        } else{
+            AsyncTask<String, Void, String> task = new AsyncTask<String, Void, String>() {
+                boolean success = true;
+                String jsonString;
+
+                @Override
+                protected String doInBackground(String... strings) {
+                    final String url = "http://i.cs.hku.hk/~ynchen/blacklist.php?" + "action=check&num=" + phoneNumber;
+                    jsonString = getJsonPage(url);
+                    if (jsonString.equals("Fail to connect"))
+                        success = false;
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(String result) {
+                    if (success) {
+                        parse_JSON_String_and_Switch_Activity(jsonString);
+                        JSONObject rootJSONObj = null;
+                        try {
+                            rootJSONObj = new JSONObject(jsonString);
+                            String deception = rootJSONObj.getString("deception");
+                            int deception_int = Integer.valueOf(deception);
+                            if(deception_int == 0){
+                                final String items[]={"Skip","Advertisement","Crime", "Other Deception Kind"};
+                                AlertDialog.Builder builder=new AlertDialog.Builder(context);  //先得到构造器
+                                builder.setTitle("Mark Call");                                     //设置标题
+//                                builder.setIcon(R.mipmap.ic_launcher);                      //设置图标，图片id即可
+
+                                ButtonOnClick clickListener = new ButtonOnClick(0);
+
+                                //设置单选按钮
+                                //  items   为列表项
+                                //  0       为默认选中第一个
+                                //  第三个参数是监听器
+                                builder.setSingleChoiceItems(items,0, clickListener);
+
+                                //  设置监听器
+                                builder.setPositiveButton("确定", clickListener);
+                                builder.create().show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                    }
+                }
+            }.execute("");
+
+            getWarningPicture();
+
+        }
+    }
+
+    private class ButtonOnClick implements DialogInterface.OnClickListener{
+        private int index;
+
+        public ButtonOnClick(int index){
+            this.index = index;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if(which >= 0){
+                index = which;
+            } else if(which == -1){
+                Toast.makeText(context, Integer.toString(index), Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        }
+    }
+
+    private void readContacts() {
         if(context != null) {
             List<String> contractname = new ArrayList<String>();
-            List<String> contractnumber = new ArrayList<String>();
 
             ContentResolver resolver = context.getContentResolver();
             Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
@@ -116,18 +195,15 @@ public class WarningHandler {
                     String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                     phoneNumber = phoneNumber.replaceAll("[() +-]", "");
                     contractname.add(name);
-                    contractnumber.add(phoneNumber);
+                    contacts.add(phoneNumber);
                 }
                 phoneCursor.close();
             }
             cursor.close();
-            contractNumSet.addAll(contractnumber);
         }
-
-        return contractNumSet;
     }
 
-    public void getWarningPicture(){
+    private void getWarningPicture(){
         AsyncTask<String, Void, Drawable> task = new AsyncTask<String, Void, Drawable>() {
 
             @Override
@@ -173,11 +249,13 @@ public class WarningHandler {
 
                 View rootView = inflater.inflate(R.layout.activity_main, null);
                 popupWindow.showAtLocation(rootView, Gravity.CENTER,0,10);
+
+                Toast.makeText(context, warningMessage , Toast.LENGTH_SHORT).show();
             }
         }.execute("");
     }
 
-    public String getJsonPage(String url) {
+    private String getJsonPage(String url) {
         HttpURLConnection conn_object = null;
         final int HTML_BUFFER_SIZE = 2*1024*1024;
         char htmlBuffer[] = new char[HTML_BUFFER_SIZE];
@@ -203,7 +281,7 @@ public class WarningHandler {
         }
     }
 
-    public String ReadBufferedHTML(BufferedReader reader, char [] htmlBuffer, int bufSz) throws java.io.IOException
+    private String ReadBufferedHTML(BufferedReader reader, char [] htmlBuffer, int bufSz) throws java.io.IOException
     {
         htmlBuffer[0] = '\0';
         int offset = 0;
@@ -218,7 +296,7 @@ public class WarningHandler {
         return new String(htmlBuffer);
     }
 
-    public void parse_JSON_String_and_Switch_Activity(String JSONString) {
+    private void parse_JSON_String_and_Switch_Activity(String JSONString) {
         String deception = "";
         String type = "";
         try {
@@ -241,6 +319,7 @@ public class WarningHandler {
 
         } catch (JSONException e) {
             e.printStackTrace();
+            warningMessage += " is not included in your phone books !";
         }
     }
 }
