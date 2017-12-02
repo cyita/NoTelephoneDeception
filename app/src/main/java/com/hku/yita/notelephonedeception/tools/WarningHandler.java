@@ -1,15 +1,18 @@
 package com.hku.yita.notelephonedeception.tools;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
@@ -52,14 +55,17 @@ public class WarningHandler {
     private static Context context;
     private static String warningMessage;
     private static HashSet<String> contacts;
+    private static boolean state;
 
-    private WarningHandler(){}
+    private WarningHandler(){
+        warningMessage = "";
+        contacts = new HashSet<>();
+        state = true;
+    }
 
     public static synchronized WarningHandler getInstance(){
         if(handler == null){
             handler = new WarningHandler();
-            warningMessage = "";
-            contacts = new HashSet<>();
         }
         return handler;
     }
@@ -69,6 +75,9 @@ public class WarningHandler {
     }
 
     public void checkDeceptionCall(final String incomingCall){
+        if(!state){
+            return;
+        }
         readContacts();
         if(contacts.contains(incomingCall)){
         } else{
@@ -102,6 +111,9 @@ public class WarningHandler {
     }
 
     public void markDeceptionCall(final String phoneNumber){
+        if(!state){
+            return;
+        }
         warningMessage = "";
         if(contacts.contains(phoneNumber)){
         } else{
@@ -316,15 +328,15 @@ public class WarningHandler {
             int deception_int = Integer.valueOf(deception);
             type = rootJSONObj.getString("type");
             int type_int = Integer.valueOf(type);
-            if(deception_int != 0 && deception_int != 2){
-                if(type_int == 1){
+            if (deception_int != 0 && deception_int != 2) {
+                if (type_int == 1) {
                     warningMessage += " is marked as advertisement call !";
-                } else if(type_int == 2){
+                } else if (type_int == 2) {
                     warningMessage += " is marked as crime call !";
-                } else{
+                } else {
                     warningMessage += " is marked as deception call !";
                 }
-            } else{
+            } else {
                 warningMessage += " is not included in your phone books !";
             }
 
@@ -332,6 +344,10 @@ public class WarningHandler {
             e.printStackTrace();
             warningMessage += " is not included in your phone books !";
         }
+    }
+
+    public void setState(boolean state){
+        this.state = state;
     }
 }
 

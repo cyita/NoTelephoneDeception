@@ -5,7 +5,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
@@ -14,13 +13,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.hku.yita.notelephonedeception.tools.WarningHandler;
@@ -46,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
         setContentView(R.layout.activity_main);
         txt = (TextView) findViewById(R.id.txt);
         slide = (SlideSwitchView) findViewById(R.id.swit);
-        slide.setState(false);
+        slide.setState(true);
         slide.setSlideListener(this);
         Intent intent=new Intent(this,PhoneService.class);
         startService(intent);
@@ -65,15 +57,13 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
     @Override
     public void open() {
         txt.setText("open");
+        handler.setState(true);
     }
 
     @Override
     public void close() {
         txt.setText("close");
-
-
-
-
+        handler.setState(false);
     }
 
 
@@ -81,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         } else {
-            readContacts();
         }
     }
 
@@ -105,28 +94,28 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
         }
     }
 
-    private void readContacts() {
-        List<String> contractname = new ArrayList<String>();
-        List<String> contractnumber = new ArrayList<String>();
-        //Button btn = (Button) findViewById(R.id.button);
-        ContentResolver resolver = getContentResolver();
-        Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
-        Cursor cursor = resolver.query(uri, null, null, null, null);
-        while (cursor.moveToNext()) {
-            String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-
-
-            Cursor phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
-
-            while(phoneCursor.moveToNext()){
-
-                String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                contractname.add(name);
-                contractnumber.add(phoneNumber);
-            }
-            phoneCursor.close();
-        }
-        cursor.close();
-    }
+//    private void readContacts() {
+//        List<String> contractname = new ArrayList<String>();
+//        List<String> contractnumber = new ArrayList<String>();
+//        //Button btn = (Button) findViewById(R.id.button);
+//        ContentResolver resolver = getContentResolver();
+//        Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
+//        Cursor cursor = resolver.query(uri, null, null, null, null);
+//        while (cursor.moveToNext()) {
+//            String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+//            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+//
+//
+//            Cursor phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
+//
+//            while(phoneCursor.moveToNext()){
+//
+//                String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//                contractname.add(name);
+//                contractnumber.add(phoneNumber);
+//            }
+//            phoneCursor.close();
+//        }
+//        cursor.close();
+//    }
 }
