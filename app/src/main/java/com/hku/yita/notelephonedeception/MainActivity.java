@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
@@ -13,7 +14,16 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.Toast;
+
+import com.hku.yita.notelephonedeception.tools.WarningHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
     public final static int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 11;
     private TextView txt;
     SlideSwitchView slide;
-
+    private WarningHandler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
         Intent intent=new Intent(this,PhoneService.class);
         startService(intent);
         ShowContacts();
+        handler = WarningHandler.getInstance();
+        handler.setContext(this);
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
@@ -53,11 +65,6 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
     @Override
     public void open() {
         txt.setText("open");
-
-
-
-
-
     }
 
     @Override
@@ -110,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 
 
-            Cursor phoneCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
+            Cursor phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
 
             while(phoneCursor.moveToNext()){
 
