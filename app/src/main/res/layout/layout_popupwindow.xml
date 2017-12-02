@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20px"
             android:text="PLEASE MIND"
-            android:textColor="@color/colorText"
+            android:textColor="@color/colorPrimary"
             android:textAlignment="center"
             android:textSize="30px" />
 

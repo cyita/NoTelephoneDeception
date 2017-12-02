@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
         Intent intent=new Intent(this,PhoneService.class);
         startService(intent);
         ShowContacts();
+        setTitle("No Deception Calls");
         handler = WarningHandler.getInstance();
         handler.setContext(this);
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -56,13 +57,11 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
 
     @Override
     public void open() {
-        txt.setText("open");
         handler.setState(true);
     }
 
     @Override
     public void close() {
-        txt.setText("close");
         handler.setState(false);
     }
 
