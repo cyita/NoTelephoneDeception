@@ -94,28 +94,28 @@ public class MainActivity extends AppCompatActivity implements SlideListener{
         }
     }
 
-//    private void readContacts() {
-//        List<String> contractname = new ArrayList<String>();
-//        List<String> contractnumber = new ArrayList<String>();
-//        //Button btn = (Button) findViewById(R.id.button);
-//        ContentResolver resolver = getContentResolver();
-//        Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
-//        Cursor cursor = resolver.query(uri, null, null, null, null);
-//        while (cursor.moveToNext()) {
-//            String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-//            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-//
-//
-//            Cursor phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
-//
-//            while(phoneCursor.moveToNext()){
-//
-//                String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-//                contractname.add(name);
-//                contractnumber.add(phoneNumber);
-//            }
-//            phoneCursor.close();
-//        }
-//        cursor.close();
-//    }
+    private void readContacts() {
+        List<String> contractname = new ArrayList<String>();
+        List<String> contractnumber = new ArrayList<String>();
+        //Button btn = (Button) findViewById(R.id.button);
+        ContentResolver resolver = getContentResolver();
+        Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
+        Cursor cursor = resolver.query(uri, null, null, null, null);
+        while (cursor.moveToNext()) {
+            String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+
+
+            Cursor phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
+
+            while(phoneCursor.moveToNext()){
+
+                String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                contractname.add(name);
+                contractnumber.add(phoneNumber);
+            }
+            phoneCursor.close();
+        }
+        cursor.close();
+    }
 }
