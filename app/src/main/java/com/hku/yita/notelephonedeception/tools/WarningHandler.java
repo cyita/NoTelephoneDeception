@@ -102,6 +102,7 @@ public class WarningHandler {
     }
 
     public void markDeceptionCall(final String phoneNumber){
+        warningMessage = "";
         if(contacts.contains(phoneNumber)){
         } else{
             AsyncTask<String, Void, String> task = new AsyncTask<String, Void, String>() {
@@ -120,7 +121,6 @@ public class WarningHandler {
                 @Override
                 protected void onPostExecute(String result) {
                     if (success) {
-                        parse_JSON_String_and_Switch_Activity(jsonString);
                         JSONObject rootJSONObj = null;
                         try {
                             rootJSONObj = new JSONObject(jsonString);
@@ -132,7 +132,7 @@ public class WarningHandler {
                                 builder.setTitle("Mark Call");                                     //设置标题
 //                                builder.setIcon(R.mipmap.ic_launcher);                      //设置图标，图片id即可
 
-                                ButtonOnClick clickListener = new ButtonOnClick(0);
+                                ButtonOnClick clickListener = new ButtonOnClick(0, phoneNumber);
 
                                 //设置单选按钮
                                 //  items   为列表项
@@ -141,7 +141,7 @@ public class WarningHandler {
                                 builder.setSingleChoiceItems(items,0, clickListener);
 
                                 //  设置监听器
-                                builder.setPositiveButton("确定", clickListener);
+                                builder.setPositiveButton("Confirm", clickListener);
                                 builder.create().show();
                             }
                         } catch (JSONException e) {
@@ -152,17 +152,16 @@ public class WarningHandler {
                     }
                 }
             }.execute("");
-
-            getWarningPicture();
-
         }
     }
 
     private class ButtonOnClick implements DialogInterface.OnClickListener{
         private int index;
+        private String num;
 
-        public ButtonOnClick(int index){
+        public ButtonOnClick(int index, String num){
             this.index = index;
+            this.num = num;
         }
 
         @Override
@@ -170,7 +169,20 @@ public class WarningHandler {
             if(which >= 0){
                 index = which;
             } else if(which == -1){
-                Toast.makeText(context, Integer.toString(index), Toast.LENGTH_SHORT).show();
+
+
+                if(index != 0){
+                    Toast.makeText(context, "Thank you for your help!", Toast.LENGTH_SHORT).show();
+
+                    AsyncTask<String, Void, String> task = new AsyncTask<String, Void, String>() {
+                        @Override
+                        protected String doInBackground(String... strings) {
+                            final String url = "http://i.cs.hku.hk/~ynchen/blacklist.php?action=insert&num=" + num + "&type=" + index;
+                            String jsonString = getJsonPage(url);
+                            return jsonString;
+                        }
+                    }.execute("");
+                }
                 dialog.dismiss();
             }
         }
@@ -191,7 +203,6 @@ public class WarningHandler {
                 Cursor phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null);
 
                 while (phoneCursor.moveToNext()) {
-
                     String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                     phoneNumber = phoneNumber.replaceAll("[() +-]", "");
                     contractname.add(name);
