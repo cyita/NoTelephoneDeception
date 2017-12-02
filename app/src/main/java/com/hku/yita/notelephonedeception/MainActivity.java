@@ -2,9 +2,9 @@ package com.hku.yita.notelephonedeception;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
@@ -12,13 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hku.yita.notelephonedeception.tools.WarningHandler;
@@ -26,19 +20,30 @@ import com.hku.yita.notelephonedeception.tools.WarningHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import SlideView.SlideSwitchView;
+import SlideView.SlideSwitchView.SlideListener;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements SlideListener{
 
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     public final static int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 11;
+    private TextView txt;
+    SlideSwitchView slide;
     private WarningHandler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button btnIncomingCall = (Button) findViewById(R.id.button);
+        txt = (TextView) findViewById(R.id.txt);
+        slide = (SlideSwitchView) findViewById(R.id.swit);
+        slide.setState(true);
+        slide.setSlideListener(this);
+        Intent intent=new Intent(this,PhoneService.class);
+        startService(intent);
         ShowContacts();
+        setTitle("No Deception Calls");
         handler = WarningHandler.getInstance();
         handler.setContext(this);
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -50,13 +55,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void open() {
+        handler.setState(true);
+    }
+
+    @Override
+    public void close() {
+        handler.setState(false);
+    }
+
+
     private void ShowContacts() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         } else {
-            readContacts();
         }
-
     }
 
     @Override
@@ -77,13 +91,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-
     }
 
     private void readContacts() {
         List<String> contractname = new ArrayList<String>();
         List<String> contractnumber = new ArrayList<String>();
-        Button btn = (Button) findViewById(R.id.button);
+        //Button btn = (Button) findViewById(R.id.button);
         ContentResolver resolver = getContentResolver();
         Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
         Cursor cursor = resolver.query(uri, null, null, null, null);
@@ -103,7 +116,5 @@ public class MainActivity extends AppCompatActivity {
             phoneCursor.close();
         }
         cursor.close();
-        btn.setText(contractname.toString()+contractnumber.toString());
-
     }
 }
