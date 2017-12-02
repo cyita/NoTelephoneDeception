@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">NoTelephoneDeception</string>
+    <string name="button">Button</string>
+    <string name="warning_picture">warning_picture</string>
+    <string name="ok">OK</string>
 </resources>
