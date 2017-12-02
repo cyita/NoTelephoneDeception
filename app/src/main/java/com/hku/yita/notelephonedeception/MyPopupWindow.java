@@ -34,14 +34,6 @@ public class MyPopupWindow extends PopupWindow {
         this.mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View popupView = inflater.inflate(R.layout.layout_popupwindow, null);
-//        ok_btn = (TextView) popupView.findViewById(R.id.okbtn);
-//        ok_btn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ok_btn.setText("lala");
-//                MyPopupWindow.this.dismiss();
-//            }
-//        });
         initMyPopupWindow();
     }
 
