@@ -29,7 +29,7 @@ public class SlideSwitchView extends View {
     public static final int SHAPE_RECT = 1;
     public static final int SHAPE_CIRCLE = 2;
     private static final int RIM_SIZE = 6;
-    private static final int DEFAULT_COLOR_THEME = Color.parseColor("#32CD32");
+    private static final int DEFAULT_COLOR_THEME = Color.parseColor("#3F51B5");
 
     // 3 attributes
     private int color_theme;
