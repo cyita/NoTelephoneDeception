@@ -91,8 +91,10 @@ public class WarningHandler {
                 protected String doInBackground(String... strings) {
                     final String url = "http://i.cs.hku.hk/~ynchen/blacklist.php?" + "action=check&num=" + incomingCall;
                     jsonString = getJsonPage(url);
-                    if (jsonString.equals("Fail to connect"))
+                    if (jsonString.equals("Fail to connect")) {
+                        warningMessage += " is not included in your phone books !";
                         success = false;
+                    }
                     return null;
                 }
 
